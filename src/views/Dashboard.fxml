@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.DashboardController">
+    <top>
+        <HBox spacing="10" style="-fx-padding: 10;">
+            <TextField fx:id="searchField" promptText="Search by description..." onKeyReleased="#onSearchTransactions" />
+            <ComboBox fx:id="categoryFilter" promptText="Filter by category" onAction="#onFilterTransactions" />
+        </HBox>
+    </top>
+    <center>
+        <TableView fx:id="transactionTable" style="-fx-padding: 10;">
+            <columns>
+                <TableColumn text="Description" fx:id="descriptionColumn" />
+                <TableColumn text="Amount" fx:id="amountColumn" />
+                <TableColumn text="Category" fx:id="categoryColumn" />
+                <TableColumn text="Date" fx:id="dateColumn" />
+            </columns>
+        </TableView>
+    </center>
+    <right>
+        <PieChart fx:id="summaryChart" style="-fx-padding: 10;" />
+    </right>
+    <bottom>
+        <HBox spacing="10" style="-fx-padding: 10;">
+            <Button text="Add Transaction" onAction="#onAddTransactionClicked" />
+            <Button text="Edit Transaction" onAction="#onEditTransactionClicked" />
+            <Button text="Delete Transaction" onAction="#onDeleteTransactionClicked" />
+            <Button text="Export to CSV" onAction="#onExportToCSVClicked" />
+        </HBox>
+    </bottom>
+</BorderPane>
