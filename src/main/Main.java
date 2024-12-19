@@ -7,17 +7,20 @@ import javafx.stage.Stage;
 import utils.DatabaseHelper;
 
 public class Main extends Application {
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         // Initialize the database
-        DatabaseHelper.initializeDatabase();
+        DatabaseHelper.initializeDatabase(); // Ensure database tables exist
 
-        // Load the main dashboard
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Dashboard.fxml"));
-        Scene scene = new Scene(loader.load());
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Personal Finance Tracker");
-        primaryStage.show();
+        // Show the login screen
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Login.fxml"));
+        Scene loginScene = new Scene(loader.load());
+        primaryStage.setScene(loginScene);
+        primaryStage.setTitle("Login");
+        primaryStage.show(); // Use show() instead of showAndWait()
+
+        // You will need to transition to the dashboard after login is successful
     }
 
     public static void main(String[] args) {

@@ -347,6 +347,18 @@ public class DashboardController {
 
         heatMapPane.getChildren().add(gridPane);
     }
+    @FXML
+    private void onLogoutClicked() {
+        try {
+            Stage stage = (Stage) transactionTable.getScene().getWindow(); // Get the current stage
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Login.fxml"));
+            Scene loginScene = new Scene(loader.load());
+            stage.setScene(loginScene);
+            stage.setTitle("Login");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
 

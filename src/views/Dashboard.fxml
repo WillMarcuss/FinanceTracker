@@ -22,6 +22,7 @@
         <HBox spacing="10" style="-fx-padding: 10;">
             <TextField fx:id="searchField" promptText="Search by description..." onKeyReleased="#onSearchTransactions" />
             <ComboBox fx:id="categoryFilter" promptText="Filter by category" onAction="#onFilterTransactions" />
+            <Button text="Log Out" onAction="#onLogoutClicked" />
         </HBox>
     </top>
 

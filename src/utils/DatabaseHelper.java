@@ -1,5 +1,6 @@
 package utils;
 
+import controllers.LoginController;
 import models.Budget;
 import models.Transaction;
 
@@ -20,49 +21,65 @@ public class DatabaseHelper {
         }
     }
 
-    // Create a budgets table
     public static void initializeDatabase() {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            // Existing transactions table
+            // Create transactions table
             String transactionsTable = "CREATE TABLE IF NOT EXISTS transactions (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "user_id INTEGER, " +
                     "description TEXT, " +
                     "amount REAL, " +
                     "category TEXT, " +
-                    "date TEXT)";
+                    "date TEXT, " +
+                    "FOREIGN KEY (user_id) REFERENCES users(id))";
             conn.createStatement().execute(transactionsTable);
 
-            // New budgets table
+            // Create budgets table
             String budgetsTable = "CREATE TABLE IF NOT EXISTS budgets (" +
+                    "user_id INTEGER, " +
                     "category TEXT PRIMARY KEY, " +
-                    "amount REAL)";
+                    "amount REAL, " +
+                    "FOREIGN KEY (user_id) REFERENCES users(id))";
             conn.createStatement().execute(budgetsTable);
+
+            // Create users table
+            String usersTable = "CREATE TABLE IF NOT EXISTS users (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "username TEXT UNIQUE, " +
+                    "password TEXT)";
+            conn.createStatement().execute(usersTable);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+
     // Add or update a budget
     public static void setBudget(String category, double amount) {
+        int userId = LoginController.getLoggedInUserId(); // Get logged-in user ID
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "INSERT INTO budgets (category, amount) VALUES (?, ?) " +
-                    "ON CONFLICT(category) DO UPDATE SET amount = ?";
+            String sql = "INSERT INTO budgets (user_id, category, amount) VALUES (?, ?, ?) " +
+                    "ON CONFLICT(user_id, category) DO UPDATE SET amount = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, category);
-            pstmt.setDouble(2, amount);
+            pstmt.setInt(1, userId);
+            pstmt.setString(2, category);
             pstmt.setDouble(3, amount);
+            pstmt.setDouble(4, amount);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // Get all budgets
+
     public static List<Budget> getBudgets() {
         List<Budget> budgets = new ArrayList<>();
+        int userId = LoginController.getLoggedInUserId(); // Get logged-in user ID
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "SELECT * FROM budgets";
-            ResultSet rs = conn.createStatement().executeQuery(sql);
+            String sql = "SELECT * FROM budgets WHERE user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 budgets.add(new Budget(rs.getString("category"), rs.getDouble("amount")));
             }
@@ -73,22 +90,25 @@ public class DatabaseHelper {
     }
 
 
+
     public static List<Transaction> getTransactions() {
         List<Transaction> transactions = new ArrayList<>();
+        int userId = LoginController.getLoggedInUserId();
+
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "SELECT * FROM transactions";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            String sql = "SELECT * FROM transactions WHERE user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                Transaction transaction = new Transaction(
-                        rs.getInt("id"), // Fetch id
+                transactions.add(new Transaction(
+                        rs.getInt("id"),
                         rs.getString("description"),
                         rs.getDouble("amount"),
                         rs.getString("category"),
                         LocalDate.parse(rs.getString("date"))
-                );
-                transactions.add(transaction);
+                ));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -97,54 +117,97 @@ public class DatabaseHelper {
     }
 
     public static void addTransaction(Transaction transaction) {
+        int userId = LoginController.getLoggedInUserId(); // Get logged-in user ID
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "INSERT INTO transactions (description, amount, category, date) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO transactions (user_id, description, amount, category, date) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, transaction.getDescription());
-            pstmt.setDouble(2, transaction.getAmount());
-            pstmt.setString(3, transaction.getCategory());
-            pstmt.setString(4, transaction.getDate().toString());
+            pstmt.setInt(1, userId);
+            pstmt.setString(2, transaction.getDescription());
+            pstmt.setDouble(3, transaction.getAmount());
+            pstmt.setString(4, transaction.getCategory());
+            pstmt.setString(5, transaction.getDate().toString());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+
     public static void updateTransaction(Transaction transaction) {
+        int userId = LoginController.getLoggedInUserId();
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "UPDATE transactions SET description = ?, amount = ?, category = ?, date = ? WHERE id = ?";
+            String sql = "UPDATE transactions SET description = ?, amount = ?, category = ?, date = ? " +
+                    "WHERE id = ? AND user_id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, transaction.getDescription());
             pstmt.setDouble(2, transaction.getAmount());
             pstmt.setString(3, transaction.getCategory());
             pstmt.setString(4, transaction.getDate().toString());
             pstmt.setInt(5, transaction.getId());
+            pstmt.setInt(6, userId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     public static void deleteTransaction(int id) {
+        int userId = LoginController.getLoggedInUserId(); // Get logged-in user ID
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "DELETE FROM transactions WHERE id = ?";
+            String sql = "DELETE FROM transactions WHERE id = ? AND user_id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public static void deleteBudget(String category) {
-        try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "DELETE FROM budgets WHERE category = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, category);
+            pstmt.setInt(2, userId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    public static void deleteBudget(String category) {
+        int userId = LoginController.getLoggedInUserId(); // Get logged-in user ID
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "DELETE FROM budgets WHERE category = ? AND user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, category);
+            pstmt.setInt(2, userId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static boolean registerUser(String username, String password) {
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setString(2, password); // TODO: Hash the password for security
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static int authenticateUser(String username, String password) {
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "SELECT id FROM users WHERE username = ? AND password = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setString(2, password); // TODO: Compare hashed passwords
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Return -1 if authentication fails
+    }
 
 }
