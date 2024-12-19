@@ -4,12 +4,14 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.chart.PieChart;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.chart.*;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Budget;
@@ -18,10 +20,13 @@ import utils.DatabaseHelper;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class DashboardController {
     @FXML private TableView<Transaction> transactionTable;
@@ -32,6 +37,14 @@ public class DashboardController {
     @FXML private PieChart summaryChart;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> categoryFilter;
+    @FXML private LineChart<String, Number> lineChart;
+    @FXML private CategoryAxis lineChartXAxis;
+    @FXML private NumberAxis lineChartYAxis;
+    @FXML private BarChart<String, Number> barChart;
+    @FXML private CategoryAxis barChartXAxis;
+    @FXML private NumberAxis barChartYAxis;
+    @FXML private Pane heatMapPane;
+
 
     @FXML
     private void onSearchTransactions() {
@@ -80,6 +93,9 @@ public class DashboardController {
         // Load data into the TableView and PieChart
         loadTransactions();
         loadSummaryChart();
+        loadLineChart();
+        loadBarChart();
+        loadHeatMap();
     }
 
 
@@ -124,6 +140,9 @@ public class DashboardController {
             // Refresh the transaction table after the new transaction is added
             loadTransactions();
             loadSummaryChart();
+            loadBarChart();
+            loadLineChart();
+            loadHeatMap();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -153,6 +172,9 @@ public class DashboardController {
             // Refresh the transaction table after editing
             loadTransactions();
             loadSummaryChart();
+            loadLineChart();
+            loadHeatMap();
+            loadBarChart();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -170,6 +192,9 @@ public class DashboardController {
             DatabaseHelper.deleteTransaction(selectedTransaction.getId());
             loadTransactions();
             loadSummaryChart();
+            loadLineChart();
+            loadHeatMap();
+            loadBarChart();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -227,6 +252,97 @@ public class DashboardController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    private void loadLineChart() {
+        lineChart.getData().clear(); // Clear existing data
+
+        List<Transaction> transactions = DatabaseHelper.getTransactions();
+        Map<String, Double> dateSpendingMap = new TreeMap<>(); // Sorted by date
+
+        for (Transaction transaction : transactions) {
+            String date = transaction.getDate().toString();
+            dateSpendingMap.put(date, dateSpendingMap.getOrDefault(date, 0.0) + transaction.getAmount());
+        }
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Daily Spending");
+
+        for (Map.Entry<String, Double> entry : dateSpendingMap.entrySet()) {
+            series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+        }
+
+        lineChart.getData().add(series);
+    }
+
+    private void loadBarChart() {
+        barChart.getData().clear(); // Clear existing data
+
+        List<Transaction> transactions = DatabaseHelper.getTransactions();
+        Map<String, Double> categorySpendingMap = new HashMap<>();
+
+        for (Transaction transaction : transactions) {
+            String category = transaction.getCategory();
+            categorySpendingMap.put(category, categorySpendingMap.getOrDefault(category, 0.0) + transaction.getAmount());
+        }
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Category Spending");
+
+        for (Map.Entry<String, Double> entry : categorySpendingMap.entrySet()) {
+            series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+        }
+
+        barChart.getData().add(series);
+    }
+
+    private void loadHeatMap() {
+        heatMapPane.getChildren().clear();
+
+        List<Transaction> transactions = DatabaseHelper.getTransactions();
+        Map<String, Double> dailySpending = new HashMap<>();
+
+        // Sum up spending for each day
+        for (Transaction transaction : transactions) {
+            String date = transaction.getDate().toString();
+            dailySpending.put(date, dailySpending.getOrDefault(date, 0.0) + transaction.getAmount());
+        }
+
+        // Create a grid for the heat map
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(5);
+        gridPane.setVgap(5);
+
+        // Loop through all days in the month
+        LocalDate today = LocalDate.now();
+        YearMonth yearMonth = YearMonth.of(today.getYear(), today.getMonth());
+        int daysInMonth = yearMonth.lengthOfMonth();
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+
+        for (int day = 1; day <= daysInMonth; day++) {
+            LocalDate date = yearMonth.atDay(day);
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            int weekOfMonth = (day + firstDayOfMonth.getDayOfWeek().getValue() - 1) / 7;
+
+            // Get spending for the current day
+            String dateStr = date.toString();
+            double amount = dailySpending.getOrDefault(dateStr, 0.0);
+
+            // Create a visual box for the date
+            Label label = new Label(String.valueOf(day));
+            Rectangle box = new Rectangle(50, 50);
+            int colorIntensity = (int) Math.min(255, amount * 10); // Adjust color intensity based on spending
+            box.setFill(Color.rgb(255, 255 - colorIntensity, 255 - colorIntensity));
+
+            // Add tooltip for spending details
+            Tooltip tooltip = new Tooltip("Date: " + dateStr + "\nSpending: $" + amount);
+            Tooltip.install(box, tooltip);
+
+            // Add the visual to the grid
+            VBox vbox = new VBox(box, label);
+            gridPane.add(vbox, dayOfWeek.getValue() - 1, weekOfMonth); // Columns: Day of week (0-6), Rows: Week of month
+        }
+
+        heatMapPane.getChildren().add(gridPane);
     }
 
 

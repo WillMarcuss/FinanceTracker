@@ -1,34 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.DashboardController">
+    <!-- Top Section: Search and Filter -->
     <top>
         <HBox spacing="10" style="-fx-padding: 10;">
             <TextField fx:id="searchField" promptText="Search by description..." onKeyReleased="#onSearchTransactions" />
             <ComboBox fx:id="categoryFilter" promptText="Filter by category" onAction="#onFilterTransactions" />
         </HBox>
     </top>
+
+    <!-- Center Section: Tabs for Different Charts and TableView -->
     <center>
-        <TableView fx:id="transactionTable" style="-fx-padding: 10;">
-            <columns>
-                <TableColumn text="Description" fx:id="descriptionColumn" />
-                <TableColumn text="Amount" fx:id="amountColumn" />
-                <TableColumn text="Category" fx:id="categoryColumn" />
-                <TableColumn text="Date" fx:id="dateColumn" />
-            </columns>
-        </TableView>
+        <TabPane>
+            <!-- Tab for Transactions Table -->
+            <Tab text="Transactions">
+                <TableView fx:id="transactionTable" style="-fx-padding: 10;">
+                    <columns>
+                        <TableColumn text="Description" fx:id="descriptionColumn" />
+                        <TableColumn text="Amount" fx:id="amountColumn" />
+                        <TableColumn text="Category" fx:id="categoryColumn" />
+                        <TableColumn text="Date" fx:id="dateColumn" />
+                    </columns>
+                </TableView>
+            </Tab>
+
+            <!-- Tab for Pie Chart -->
+            <Tab text="Category Summary">
+                <PieChart fx:id="summaryChart" style="-fx-padding: 10;" />
+            </Tab>
+
+            <!-- Tab for Line Chart -->
+            <Tab text="Spending Trends">
+                <LineChart fx:id="lineChart" title="Spending Trends Over Time">
+                    <xAxis>
+                        <CategoryAxis fx:id="lineChartXAxis" label="Date" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="lineChartYAxis" label="Amount" />
+                    </yAxis>
+                </LineChart>
+            </Tab>
+
+            <!-- Tab for Bar Chart -->
+            <Tab text="Category Comparison">
+                <BarChart fx:id="barChart" title="Category Spending Comparison">
+                    <xAxis>
+                        <CategoryAxis fx:id="barChartXAxis" label="Category" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="barChartYAxis" label="Amount" />
+                    </yAxis>
+                </BarChart>
+            </Tab>
+
+            <!-- Tab for Heat Map -->
+            <Tab text="Spending Heat Map">
+                <Pane fx:id="heatMapPane" style="-fx-padding: 10;" />
+            </Tab>
+        </TabPane>
     </center>
-    <right>
-        <PieChart fx:id="summaryChart" style="-fx-padding: 10;" />
-    </right>
+
+    <!-- Bottom Section: Buttons for Actions -->
     <bottom>
         <HBox spacing="10" style="-fx-padding: 10;">
             <Button text="Add Transaction" onAction="#onAddTransactionClicked" />
