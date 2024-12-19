@@ -1,5 +1,6 @@
 package utils;
 
+import models.Budget;
 import models.Transaction;
 
 import java.sql.*;
@@ -19,20 +20,58 @@ public class DatabaseHelper {
         }
     }
 
+    // Create a budgets table
     public static void initializeDatabase() {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "CREATE TABLE IF NOT EXISTS transactions (" +
+            // Existing transactions table
+            String transactionsTable = "CREATE TABLE IF NOT EXISTS transactions (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "description TEXT, " +
                     "amount REAL, " +
                     "category TEXT, " +
                     "date TEXT)";
-            Statement stmt = conn.createStatement();
-            stmt.execute(sql);
+            conn.createStatement().execute(transactionsTable);
+
+            // New budgets table
+            String budgetsTable = "CREATE TABLE IF NOT EXISTS budgets (" +
+                    "category TEXT PRIMARY KEY, " +
+                    "amount REAL)";
+            conn.createStatement().execute(budgetsTable);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+    // Add or update a budget
+    public static void setBudget(String category, double amount) {
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "INSERT INTO budgets (category, amount) VALUES (?, ?) " +
+                    "ON CONFLICT(category) DO UPDATE SET amount = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, category);
+            pstmt.setDouble(2, amount);
+            pstmt.setDouble(3, amount);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Get all budgets
+    public static List<Budget> getBudgets() {
+        List<Budget> budgets = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "SELECT * FROM budgets";
+            ResultSet rs = conn.createStatement().executeQuery(sql);
+            while (rs.next()) {
+                budgets.add(new Budget(rs.getString("category"), rs.getDouble("amount")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return budgets;
+    }
+
 
     public static List<Transaction> getTransactions() {
         List<Transaction> transactions = new ArrayList<>();

@@ -12,6 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import models.Budget;
 import models.Transaction;
 import utils.DatabaseHelper;
 
@@ -92,20 +93,22 @@ public class DashboardController {
     private void loadSummaryChart() {
         summaryChart.getData().clear();
 
-        // Get all transactions and calculate category totals
+        // Fetch budgets and calculate usage
+        List<Budget> budgets = DatabaseHelper.getBudgets();
         List<Transaction> transactions = DatabaseHelper.getTransactions();
-        Map<String, Double> categoryTotals = new HashMap<>();
-        for (Transaction t : transactions) {
-            categoryTotals.put(t.getCategory(),
-                    categoryTotals.getOrDefault(t.getCategory(), 0.0) + t.getAmount());
-        }
 
-        // Populate the PieChart with category data
-        for (Map.Entry<String, Double> entry : categoryTotals.entrySet()) {
-            PieChart.Data slice = new PieChart.Data(entry.getKey(), entry.getValue());
-            summaryChart.getData().add(slice);
+        for (Budget budget : budgets) {
+            double totalSpent = transactions.stream()
+                    .filter(t -> t.getCategory().equals(budget.getCategory()))
+                    .mapToDouble(Transaction::getAmount)
+                    .sum();
+
+            double remainingBudget = budget.getAmount() - totalSpent;
+            String label = budget.getCategory() + " (Remaining: " + remainingBudget + ")";
+            summaryChart.getData().add(new PieChart.Data(label, remainingBudget));
         }
     }
+
 
 
     @FXML
@@ -208,6 +211,24 @@ public class DashboardController {
         // Set default selection to "All Categories"
         categoryFilter.setValue("All Categories");
     }
+
+    @FXML
+    private void onManageBudgetsClicked() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ManageBudgets.fxml"));
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Manage Budgets");
+            stage.setScene(scene);
+            stage.showAndWait();
+
+            // Refresh the PieChart or data if necessary
+            loadSummaryChart();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
 }

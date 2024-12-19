@@ -35,6 +35,7 @@
             <Button text="Edit Transaction" onAction="#onEditTransactionClicked" />
             <Button text="Delete Transaction" onAction="#onDeleteTransactionClicked" />
             <Button text="Export to CSV" onAction="#onExportToCSVClicked" />
+            <Button text="Manage Budgets" onAction="#onManageBudgetsClicked" />
         </HBox>
     </bottom>
 </BorderPane>
