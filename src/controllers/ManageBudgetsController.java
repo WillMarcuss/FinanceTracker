@@ -44,4 +44,38 @@ public class ManageBudgetsController {
     private void loadBudgets() {
         budgetTable.getItems().setAll(DatabaseHelper.getBudgets());
     }
+
+    @FXML
+    private void onEditBudgetClicked() {
+        // Get the selected budget
+        Budget selectedBudget = budgetTable.getSelectionModel().getSelectedItem();
+        if (selectedBudget == null) {
+            System.out.println("No budget selected for editing!");
+            return;
+        }
+
+        // Populate the text fields with the selected budget's details
+        categoryField.setText(selectedBudget.getCategory());
+        amountField.setText(String.valueOf(selectedBudget.getAmount()));
+
+        // Save the updated budget
+        budgetTable.getSelectionModel().clearSelection();
+    }
+
+    @FXML
+    private void onDeleteBudgetClicked() {
+        // Get the selected budget
+        Budget selectedBudget = budgetTable.getSelectionModel().getSelectedItem();
+        if (selectedBudget == null) {
+            System.out.println("No budget selected for deletion!");
+            return;
+        }
+
+        // Delete the selected budget from the database
+        DatabaseHelper.deleteBudget(selectedBudget.getCategory());
+
+        // Refresh the table
+        loadBudgets();
+    }
+
 }

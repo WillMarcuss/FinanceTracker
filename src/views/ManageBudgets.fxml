@@ -8,7 +8,7 @@
 
 <GridPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.ManageBudgetsController"
           hgap="10" vgap="10" style="-fx-padding: 20;">
-    <TableView fx:id="budgetTable" GridPane.rowIndex="0" GridPane.columnSpan="2">
+    <TableView fx:id="budgetTable" GridPane.rowIndex="0" GridPane.columnSpan="3">
         <columns>
             <TableColumn text="Category" fx:id="categoryColumn" />
             <TableColumn text="Budget Amount" fx:id="amountColumn" />
@@ -18,5 +18,7 @@
     <TextField fx:id="categoryField" promptText="Category" GridPane.rowIndex="1" GridPane.columnIndex="0" />
     <TextField fx:id="amountField" promptText="Budget Amount" GridPane.rowIndex="1" GridPane.columnIndex="1" />
 
-    <Button text="Save Budget" onAction="#onSaveBudgetClicked" GridPane.rowIndex="2" GridPane.columnSpan="2" />
+    <Button text="Save Budget" onAction="#onSaveBudgetClicked" GridPane.rowIndex="1" GridPane.columnIndex="2" />
+    <Button text="Edit Budget" onAction="#onEditBudgetClicked" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+    <Button text="Delete Budget" onAction="#onDeleteBudgetClicked" GridPane.rowIndex="2" GridPane.columnIndex="2" />
 </GridPane>

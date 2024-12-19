@@ -135,6 +135,16 @@ public class DatabaseHelper {
             e.printStackTrace();
         }
     }
+    public static void deleteBudget(String category) {
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "DELETE FROM budgets WHERE category = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, category);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }
