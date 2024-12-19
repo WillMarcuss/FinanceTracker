@@ -312,16 +312,19 @@ public class DashboardController {
         gridPane.setHgap(5);
         gridPane.setVgap(5);
 
-        // Loop through all days in the month
+        // Get the current month and year
         LocalDate today = LocalDate.now();
         YearMonth yearMonth = YearMonth.of(today.getYear(), today.getMonth());
         int daysInMonth = yearMonth.lengthOfMonth();
         LocalDate firstDayOfMonth = yearMonth.atDay(1);
 
+        // Calculate the starting column for the first day of the month
+        int startingColumn = firstDayOfMonth.getDayOfWeek().getValue() % 7; // Sunday = 0, Saturday = 6
+
         for (int day = 1; day <= daysInMonth; day++) {
             LocalDate date = yearMonth.atDay(day);
-            DayOfWeek dayOfWeek = date.getDayOfWeek();
-            int weekOfMonth = (day + firstDayOfMonth.getDayOfWeek().getValue() - 1) / 7;
+            int dayOfWeek = date.getDayOfWeek().getValue() % 7; // Sunday = 0, Saturday = 6
+            int weekOfMonth = (day + startingColumn - 1) / 7;   // Calculate the row (week) of the month
 
             // Get spending for the current day
             String dateStr = date.toString();
@@ -339,11 +342,12 @@ public class DashboardController {
 
             // Add the visual to the grid
             VBox vbox = new VBox(box, label);
-            gridPane.add(vbox, dayOfWeek.getValue() - 1, weekOfMonth); // Columns: Day of week (0-6), Rows: Week of month
+            gridPane.add(vbox, dayOfWeek, weekOfMonth); // Correct column and row placement
         }
 
         heatMapPane.getChildren().add(gridPane);
     }
+
 
 
 
