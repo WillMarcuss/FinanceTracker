@@ -8,15 +8,14 @@
 <?import javafx.scene.layout.VBox?>
 
 <StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.LoginController" stylesheets="@Login.css" styleClass="login-root">
-    <!-- Background Pane -->
     <children>
-        <!-- Background Image -->
-        <VBox alignment="CENTER" spacing="15" styleClass="login-box">
+        <!-- Centered Login Box -->
+        <VBox fx:id="loginBox" alignment="CENTER" spacing="15" styleClass="login-box">
             <Label text="Welcome to Finance Tracker" styleClass="login-title" />
             <TextField fx:id="usernameField" promptText="Username" styleClass="login-field" />
             <PasswordField fx:id="passwordField" promptText="Password" styleClass="login-field" />
             <Button text="Login" onAction="#onLoginClicked" styleClass="login-button" />
-            <Button text="Register" onAction="#onRegisterClicked" styleClass="login-button" />
+            <Button text="Register" onAction="#onRegisterClicked" styleClass="register-button" />
             <Label fx:id="errorLabel" text="" styleClass="login-error" />
         </VBox>
     </children>

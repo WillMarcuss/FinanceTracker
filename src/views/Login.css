@@ -8,8 +8,8 @@
 
 /* Login Box */
 .login-box {
-    -fx-background-color: rgba(255, 255, 255, 0.85);
-    -fx-padding: 30;
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-padding: 40;
     -fx-spacing: 20;
     -fx-alignment: center;
     -fx-border-radius: 15;
@@ -18,23 +18,25 @@
 
 /* Login Title */
 .login-title {
-    -fx-font-size: 24px;
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-text-fill: #4caf50;
+    -fx-padding-bottom: 15;
 }
 
 /* Login Fields */
 .login-field {
-    -fx-pref-width: 300;
-    -fx-padding: 10;
+    -fx-pref-width: 320;
+    -fx-padding: 12;
     -fx-background-radius: 10;
     -fx-border-radius: 10;
     -fx-border-color: #dcdcdc;
     -fx-border-width: 1;
+    -fx-font-size: 14px;
 }
 
-/* Login Button */
-.login-button {
+/* Buttons */
+.login-button, .register-button {
     -fx-background-color: #4caf50;
     -fx-text-fill: white;
     -fx-font-size: 16px;
@@ -44,12 +46,12 @@
     -fx-border-radius: 10;
 }
 
-.login-button:hover {
-    -fx-opacity: 0.9;
+.login-button:hover, .register-button:hover {
+    -fx-background-color: #45a049;
 }
 
-.login-button:pressed {
-    -fx-opacity: 0.8;
+.login-button:pressed, .register-button:pressed {
+    -fx-background-color: #388e3c;
 }
 
 /* Error Label */
@@ -57,4 +59,10 @@
     -fx-text-fill: #f44336;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
+    -fx-opacity: 0;
+    -fx-transition: opacity 0.3s ease-in-out;
+}
+
+.login-error:visible {
+    -fx-opacity: 1;
 }
