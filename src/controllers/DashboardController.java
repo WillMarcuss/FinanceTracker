@@ -17,7 +17,9 @@ import javafx.stage.Stage;
 import models.Budget;
 import models.Transaction;
 import utils.DatabaseHelper;
-
+import javafx.animation.FadeTransition;
+import javafx.scene.Node;
+import javafx.util.Duration;
 import java.io.File;
 import java.io.PrintWriter;
 import java.time.DayOfWeek;
@@ -44,6 +46,7 @@ public class DashboardController {
     @FXML private CategoryAxis barChartXAxis;
     @FXML private NumberAxis barChartYAxis;
     @FXML private Pane heatMapPane;
+    private TabPane tabPane;
 
 
     @FXML
@@ -78,6 +81,7 @@ public class DashboardController {
 
     @FXML
     private void initialize() {
+        applyFadeTransition(tabPane, 0.5); // Smooth transition for TabPane
         // Bind the TableView columns to Transaction properties
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
@@ -360,6 +364,12 @@ public class DashboardController {
         }
     }
 
+    public void applyFadeTransition(Node node, double durationInSeconds) {
+        FadeTransition fade = new FadeTransition(Duration.seconds(durationInSeconds), node);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.play();
+    }
 
 
 

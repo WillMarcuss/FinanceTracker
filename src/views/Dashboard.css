@@ -1,0 +1,86 @@
+/* General Styles */
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #f4f4f9;
+}
+
+/* Tabs */
+.tab-pane {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dcdcdc;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.tab {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* TextField and ComboBox */
+.text-field, .combo-box {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #dcdcdc;
+    -fx-padding: 8;
+}
+
+/* Buttons */
+.button {
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10;
+    -fx-text-fill: white;
+}
+
+.button:hover {
+    -fx-opacity: 0.8;
+}
+
+.button:pressed {
+    -fx-opacity: 0.6;
+}
+
+/* Specific Button Colors */
+.button-add {
+    -fx-background-color: #6a8769;
+}
+
+.button-edit {
+    -fx-background-color: #6a8769;
+}
+
+.button-delete {
+    -fx-background-color: #6a8769;
+}
+
+.button-export {
+    -fx-background-color: #6a8769;
+}
+
+.button-manage {
+    -fx-background-color: #6a8769;
+}
+
+/* Charts */
+.chart-pie {
+    -fx-pie-label-color: #000000;
+}
+
+.chart-line, .chart-bar {
+    -fx-border-color: #dcdcdc;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+/* TableView */
+.table-view {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #dcdcdc;
+}
+
+.table-column {
+    -fx-alignment: CENTER_LEFT;
+}

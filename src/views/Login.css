@@ -1,0 +1,60 @@
+/* Root Styles */
+.login-root {
+    -fx-background-image: url("background.jpg");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+/* Login Box */
+.login-box {
+    -fx-background-color: rgba(255, 255, 255, 0.85);
+    -fx-padding: 30;
+    -fx-spacing: 20;
+    -fx-alignment: center;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+}
+
+/* Login Title */
+.login-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4caf50;
+}
+
+/* Login Fields */
+.login-field {
+    -fx-pref-width: 300;
+    -fx-padding: 10;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #dcdcdc;
+    -fx-border-width: 1;
+}
+
+/* Login Button */
+.login-button {
+    -fx-background-color: #4caf50;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.login-button:hover {
+    -fx-opacity: 0.9;
+}
+
+.login-button:pressed {
+    -fx-opacity: 0.8;
+}
+
+/* Error Label */
+.login-error {
+    -fx-text-fill: #f44336;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
