@@ -65,18 +65,32 @@ public class LoginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
+        // Validate input fields
         if (username.isEmpty() || password.isEmpty()) {
             errorLabel.setText("Please fill out all fields.");
-            applyShakeEffect(loginBox); // Shake the login box on empty fields
+            errorLabel.setStyle("-fx-text-fill: #f44336;"); // Red color for error
+            applyShakeEffect(loginBox); // Shake effect for empty fields
             return;
         }
 
+        // Check if username already exists
+        if (DatabaseHelper.doesUsernameExist(username)) {
+            errorLabel.setText("Username already exists. Please choose another.");
+            errorLabel.setStyle("-fx-text-fill: #f44336;"); // Red color for error
+            applyShakeEffect(loginBox); // Shake effect for duplicate username
+            return;
+        }
+
+        // Attempt to register user
         boolean success = DatabaseHelper.registerUser(username, password);
         if (success) {
             errorLabel.setText("Registration successful! You can now log in.");
+            errorLabel.setStyle("-fx-text-fill: #4caf50;"); // Green color for success
         } else {
-            errorLabel.setText("Username already exists. Please choose another.");
-            applyShakeEffect(loginBox); // Shake the login box on username conflict
+            errorLabel.setText("Registration failed. Please try again.");
+            errorLabel.setStyle("-fx-text-fill: #f44336;"); // Red color for error
+            applyShakeEffect(loginBox); // Shake effect for failure
         }
     }
+
 }

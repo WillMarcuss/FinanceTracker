@@ -54,15 +54,18 @@
     -fx-background-color: #388e3c;
 }
 
-/* Error Label */
+/* Error Label (Default Style) */
 .login-error {
-    -fx-text-fill: #f44336;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-opacity: 0;
-    -fx-transition: opacity 0.3s ease-in-out;
+    -fx-opacity: 1;
+    -fx-translate-y: -10;
+    -fx-transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+/* Show Error or Success Message */
 .login-error:visible {
     -fx-opacity: 1;
+    -fx-translate-y: 0;
 }
+

@@ -210,4 +210,20 @@ public class DatabaseHelper {
         return -1; // Return -1 if authentication fails
     }
 
+    public static boolean doesUsernameExist(String username) {
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // Returns true if username exists
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Returns false if query fails or username does not exist
+    }
+
+
 }
