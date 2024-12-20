@@ -1,6 +1,6 @@
 /* Root Styles */
 .login-root {
-    -fx-background-image: url("background.jpg");
+    -fx-background-image: url("background.jpg"); /* Subtle professional background image */
     -fx-background-size: cover;
     -fx-background-position: center;
     -fx-font-family: "Segoe UI", sans-serif;
@@ -8,7 +8,7 @@
 
 /* Login Box */
 .login-box {
-    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-background-color: rgba(245, 245, 245, 0.95); /* Softer, neutral background color */
     -fx-padding: 40;
     -fx-spacing: 20;
     -fx-alignment: center;
@@ -20,7 +20,7 @@
 .login-title {
     -fx-font-size: 28px;
     -fx-font-weight: bold;
-    -fx-text-fill: #4caf50;
+    -fx-text-fill: #2c3e50; /* Dark, professional blue-gray */
     -fx-padding-bottom: 15;
 }
 
@@ -30,28 +30,37 @@
     -fx-padding: 12;
     -fx-background-radius: 10;
     -fx-border-radius: 10;
-    -fx-border-color: #dcdcdc;
-    -fx-border-width: 1;
+    -fx-border-color: #bdc3c7; /* Light gray border */
+    -fx-border-width: 1.5;
     -fx-font-size: 14px;
+    -fx-background-color: #ecf0f1; /* Light background for input fields */
+    -fx-text-fill: #34495e; /* Neutral dark text */
+}
+
+.login-field:focused {
+    -fx-border-color: #3498db; /* Highlight on focus */
+    -fx-background-color: #ffffff; /* Bright background on focus */
 }
 
 /* Buttons */
 .login-button, .register-button {
-    -fx-background-color: #4caf50;
+    -fx-background-color: #3498db; /* Modern blue */
     -fx-text-fill: white;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-padding: 10;
     -fx-background-radius: 10;
     -fx-border-radius: 10;
+    -fx-border-width: 0;
+
 }
 
 .login-button:hover, .register-button:hover {
-    -fx-background-color: #45a049;
+    -fx-background-color: #2980b9; /* Darker blue for hover */
 }
 
 .login-button:pressed, .register-button:pressed {
-    -fx-background-color: #388e3c;
+    -fx-background-color: #1f618d; /* Even darker blue for pressed state */
 }
 
 /* Error Label (Default Style) */
@@ -61,11 +70,15 @@
     -fx-opacity: 1;
     -fx-translate-y: -10;
     -fx-transition: opacity 0.3s ease, transform 0.3s ease;
+    -fx-text-fill: #e74c3c; /* Professional red for errors */
 }
 
-/* Show Error or Success Message */
-.login-error:visible {
+/* Success Styling */
+.success-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
     -fx-opacity: 1;
     -fx-translate-y: 0;
+    -fx-text-fill: #27ae60; /* Modern green for success */
+    -fx-transition: opacity 0.3s ease, transform 0.3s ease;
 }
-
