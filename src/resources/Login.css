@@ -8,7 +8,7 @@
 
 /* Login Box */
 .login-box {
-    -fx-background-color: rgba(245, 245, 245, 0.95); /* Softer, neutral background color */
+    -fx-background-image: url("background.jpg"); /* Subtle professional background image */
     -fx-padding: 40;
     -fx-spacing: 20;
     -fx-alignment: center;

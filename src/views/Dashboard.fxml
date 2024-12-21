@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.DashboardController" stylesheets="@Dashboard.css">
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="controllers.DashboardController" stylesheets="@../resources/Dashboard.css">
     <!-- Top Section: Search and Filter -->
     <top>
         <HBox spacing="10" style="-fx-padding: 10;">
