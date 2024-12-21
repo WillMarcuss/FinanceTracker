@@ -3,7 +3,7 @@ package utils;
 import controllers.LoginController;
 import models.Budget;
 import models.Transaction;
-
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -181,10 +181,11 @@ public class DatabaseHelper {
 
     public static boolean registerUser(String username, String password) {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String hashedPassword = BCrypt.withDefaults().hashToString(12, password.toCharArray());
             String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
-            pstmt.setString(2, password); // TODO: Hash the password for security
+            pstmt.setString(2, hashedPassword);
             pstmt.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -195,20 +196,24 @@ public class DatabaseHelper {
 
     public static int authenticateUser(String username, String password) {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            String sql = "SELECT id FROM users WHERE username = ? AND password = ?";
+            String sql = "SELECT id, password FROM users WHERE username = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
-            pstmt.setString(2, password); // TODO: Compare hashed passwords
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                return rs.getInt("id");
+                String storedPassword = rs.getString("password");
+                BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), storedPassword);
+                if (result.verified) {
+                    return rs.getInt("id");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1; // Return -1 if authentication fails
     }
+
 
     public static boolean doesUsernameExist(String username) {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
