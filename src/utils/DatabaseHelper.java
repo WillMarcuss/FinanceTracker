@@ -230,5 +230,27 @@ public class DatabaseHelper {
         return false; // Returns false if query fails or username does not exist
     }
 
+    public static void importTransactions(List<Transaction> transactions) {
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "INSERT INTO transactions (user_id, description, amount, category, date) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            int userId = LoginController.getLoggedInUserId();
+
+            for (Transaction transaction : transactions) {
+                pstmt.setInt(1, userId);
+                pstmt.setString(2, transaction.getDescription());
+                pstmt.setDouble(3, transaction.getAmount());
+                pstmt.setString(4, transaction.getCategory());
+                pstmt.setString(5, transaction.getDate().toString());
+                pstmt.addBatch();
+            }
+
+            pstmt.executeBatch();
+            System.out.println("Transactions imported into the database.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

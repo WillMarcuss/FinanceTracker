@@ -63,6 +63,10 @@
     -fx-background-color: #6a8769;
 }
 
+.button-import {
+    -fx-background-color: #6a8769;
+}
+
 /* Charts */
 .chart-pie {
     -fx-pie-label-color: #000000;

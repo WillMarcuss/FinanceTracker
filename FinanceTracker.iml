@@ -11,5 +11,6 @@
     <orderEntry type="library" name="sqlite-jdbc-3.47.1.0" level="project" />
     <orderEntry type="library" name="bcrypt-0.10.2" level="project" />
     <orderEntry type="library" name="bytes-1.6.1" level="project" />
+    <orderEntry type="library" name="pdfbox-app-3.0.3" level="project" />
   </component>
 </module>

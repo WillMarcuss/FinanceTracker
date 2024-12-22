@@ -16,11 +16,18 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Budget;
 import models.Transaction;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import utils.DatabaseHelper;
 import javafx.animation.FadeTransition;
 import javafx.scene.Node;
 import javafx.util.Duration;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.PrintWriter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -371,6 +378,95 @@ public class DashboardController {
         fade.play();
     }
 
+    @FXML
+    private void onImportTransactionsClicked() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import Transactions");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fileChooser.showOpenDialog(transactionTable.getScene().getWindow());
+
+        if (file != null) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                boolean isFirstLine = true;
+                while ((line = reader.readLine()) != null) {
+                    if (isFirstLine) {
+                        isFirstLine = false;
+                        continue;
+                    }
+
+                    String[] data = line.split(",");
+                    if (data.length == 4) {
+                        Transaction transaction = new Transaction(
+                                0,
+                                data[0], // Description
+                                Double.parseDouble(data[1]), // Amount
+                                data[2], // Category
+                                LocalDate.parse(data[3]) // Date
+                        );
+                        DatabaseHelper.addTransaction(transaction);
+                    }
+                }
+                loadTransactions();
+                loadSummaryChart();
+                loadBarChart();
+                loadLineChart();
+                loadHeatMap();
+                System.out.println("Transactions imported successfully!");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @FXML
+    private void onExportToPDFClicked() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save PDF Report");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        File file = fileChooser.showSaveDialog(transactionTable.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                PDDocument document = new PDDocument();
+                PDPage page = new PDPage();
+                document.addPage(page);
+
+                PDPageContentStream contentStream = new PDPageContentStream(document, page);
+                contentStream.beginText();
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);
+                contentStream.newLineAtOffset(50, 700);
+                contentStream.showText("Finance Tracker - Transaction Report");
+                contentStream.newLineAtOffset(0, -20);
+
+                double totalExpenses = DatabaseHelper.getTransactions()
+                        .stream().mapToDouble(Transaction::getAmount).sum();
+
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 14);
+                contentStream.showText("Total Expenses: $" + totalExpenses);
+                contentStream.newLineAtOffset(0, -20);
+
+                contentStream.showText("Transactions:");
+                contentStream.newLineAtOffset(0, -20);
+
+                for (Transaction t : DatabaseHelper.getTransactions()) {
+                    String line = String.format("%s | $%.2f | %s | %s",
+                            t.getDescription(), t.getAmount(), t.getCategory(), t.getDate());
+                    contentStream.showText(line);
+                    contentStream.newLineAtOffset(0, -15);
+                }
+
+                contentStream.endText();
+                contentStream.close();
+
+                document.save(file);
+                document.close();
+                System.out.println("PDF report generated successfully!");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
 }
