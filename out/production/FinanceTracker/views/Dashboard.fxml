@@ -84,6 +84,8 @@
             <Button text="Edit Transaction" onAction="#onEditTransactionClicked" styleClass="button-edit" />
             <Button text="Delete Transaction" onAction="#onDeleteTransactionClicked" styleClass="button-delete" />
             <Button text="Export to CSV" onAction="#onExportToCSVClicked" styleClass="button-export" />
+            <Button text="Export PDF Report" onAction="#onExportToPDFClicked" styleClass="button-export" />
+            <Button text="Import Transactions" onAction="#onImportTransactionsClicked" styleClass="button-import" />
             <Button text="Manage Budgets" onAction="#onManageBudgetsClicked" styleClass="button-manage" />
         </HBox>
     </bottom>

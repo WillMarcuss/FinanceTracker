@@ -253,4 +253,67 @@ public class DatabaseHelper {
         }
     }
 
+    public static String getCurrentUsername() {
+        int userId = LoginController.getLoggedInUserId(); // Get the logged-in user's ID
+        String username = null;
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "SELECT username FROM users WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                username = rs.getString("username");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return username;
+    }
+
+    public static List<Budget> getUserBudgets() {
+        int userId = LoginController.getLoggedInUserId(); // Get the logged-in user's ID
+        List<Budget> budgets = new ArrayList<>();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            String sql = "SELECT category, amount FROM budgets WHERE user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                budgets.add(new Budget(rs.getString("category"), rs.getDouble("amount")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return budgets;
+    }
+
+    public static double getAverageDailySpending() {
+        int userId = LoginController.getLoggedInUserId(); // Get the logged-in user's ID
+        double totalExpenses = 0.0;
+        int uniqueDays = 0;
+
+        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+            // Query to calculate total expenses and count distinct days
+            String sql = "SELECT SUM(amount) AS total, COUNT(DISTINCT date) AS days " +
+                    "FROM transactions WHERE user_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                totalExpenses = rs.getDouble("total");
+                uniqueDays = rs.getInt("days");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Avoid division by zero
+        return uniqueDays > 0 ? totalExpenses / uniqueDays : 0.0;
+    }
+
+
 }

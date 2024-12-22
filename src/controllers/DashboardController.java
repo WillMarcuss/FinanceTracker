@@ -1,12 +1,15 @@
 package controllers;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -25,17 +28,19 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.time.DayOfWeek;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+
+import javax.imageio.ImageIO;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class DashboardController {
     @FXML private TableView<Transaction> transactionTable;
@@ -421,52 +426,120 @@ public class DashboardController {
 
     @FXML
     private void onExportToPDFClicked() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save PDF Report");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-        File file = fileChooser.showSaveDialog(transactionTable.getScene().getWindow());
+        try (PDDocument document = new PDDocument()) {
+            // Retrieve transactions
+            List<Transaction> transactions = DatabaseHelper.getTransactions();
 
-        if (file != null) {
-            try {
-                PDDocument document = new PDDocument();
-                PDPage page = new PDPage();
-                document.addPage(page);
-
-                PDPageContentStream contentStream = new PDPageContentStream(document, page);
+            // 1️⃣ Cover Page
+            PDPage coverPage = new PDPage(PDRectangle.A4);
+            document.addPage(coverPage);
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, coverPage)) {
                 contentStream.beginText();
-                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);
-                contentStream.newLineAtOffset(50, 700);
-                contentStream.showText("Finance Tracker - Transaction Report");
-                contentStream.newLineAtOffset(0, -20);
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 24);
+                contentStream.newLineAtOffset(100, 700);
+                contentStream.showText("Finance Tracker - Financial Report");
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 20);
+                contentStream.newLineAtOffset(0, -50);
+                contentStream.showText("Generated on: " + LocalDate.now());
+                contentStream.newLineAtOffset(0, -50);
+                contentStream.showText("User: " +DatabaseHelper.getCurrentUsername());
+                contentStream.endText();
+            }
 
-                double totalExpenses = DatabaseHelper.getTransactions()
-                        .stream().mapToDouble(Transaction::getAmount).sum();
+            // 2️⃣ Summary Section
+            PDPage summaryPage = new PDPage(PDRectangle.A4);
+            document.addPage(summaryPage);
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, summaryPage)) {
+                contentStream.beginText();
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 18);
+                contentStream.newLineAtOffset(50, 750);
+                contentStream.showText("Summary");
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
+                contentStream.newLineAtOffset(0, -30);
 
-                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 14);
+                double totalExpenses = transactions.stream().mapToDouble(Transaction::getAmount).sum();
+                List<Transaction> ts = DatabaseHelper.getTransactions();
                 contentStream.showText("Total Expenses: $" + totalExpenses);
                 contentStream.newLineAtOffset(0, -20);
-
-                contentStream.showText("Transactions:");
+                contentStream.showText("Highest Expense: " +getHighestTransaction(ts));
                 contentStream.newLineAtOffset(0, -20);
-
-                for (Transaction t : DatabaseHelper.getTransactions()) {
-                    String line = String.format("%s | $%.2f | %s | %s",
-                            t.getDescription(), t.getAmount(), t.getCategory(), t.getDate());
-                    contentStream.showText(line);
-                    contentStream.newLineAtOffset(0, -15);
-                }
-
+                contentStream.showText("Average Daily Spending: " +DatabaseHelper.getAverageDailySpending());
                 contentStream.endText();
-                contentStream.close();
-
-                document.save(file);
-                document.close();
-                System.out.println("PDF report generated successfully!");
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+
+            // 3️⃣ Transactions Table
+            PDPage transactionsPage = new PDPage(PDRectangle.A4);
+            document.addPage(transactionsPage);
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, transactionsPage)) {
+                contentStream.beginText();
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 18);
+                contentStream.newLineAtOffset(50, 750);
+                contentStream.showText("Transaction Details");
+                contentStream.endText();
+
+                float y = 700;
+                for (Transaction t : transactions) {
+                    contentStream.beginText();
+                    contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);
+                    contentStream.newLineAtOffset(50, y);
+                    contentStream.showText(String.format("%s | $%.2f | %s | %s",
+                            t.getDescription(), t.getAmount(), t.getCategory(), t.getDate()));
+                    contentStream.endText();
+                    y -= 20;
+                }
+            }
+
+            // 4️⃣ Include Charts
+            PDPage chartPage = new PDPage(PDRectangle.A4);
+            document.addPage(chartPage);
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, chartPage)) {
+                exportChartAsImage(summaryChart, "pieChart.png");
+                exportChartAsImage(barChart, "barChart.png");
+                exportChartAsImage(lineChart, "lineChart.png");
+
+                PDImageXObject pieChart = PDImageXObject.createFromFile("pieChart.png", document);
+                PDImageXObject barChart = PDImageXObject.createFromFile("barChart.png", document);
+                PDImageXObject lineChart = PDImageXObject.createFromFile("lineChart.png", document);
+
+                contentStream.drawImage(pieChart, 0, 500, 200, 200);
+                contentStream.drawImage(barChart, 0, 500, 400, 200);
+                contentStream.drawImage(lineChart, 0, 250, 450, 200);
+            }
+
+            // 5️⃣ Save PDF
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save PDF Report");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+            File file = fileChooser.showSaveDialog(transactionTable.getScene().getWindow());
+
+            if (file != null) {
+                document.save(file);
+                System.out.println("PDF Export Successful!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
+
+    private void exportChartAsImage(Chart chart, String filename) {
+        WritableImage image = chart.snapshot(new SnapshotParameters(), null);
+        File file = new File(filename);
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public double getHighestTransaction(List<Transaction> transactions){
+        double highest = 0;
+        for(Transaction t : transactions){
+            if(t.getAmount() > highest){
+                highest = t.getAmount();
+            }
+        }
+        return highest;
+    }
 
 }
