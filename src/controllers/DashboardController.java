@@ -501,9 +501,9 @@ public class DashboardController {
                 PDImageXObject barChart = PDImageXObject.createFromFile("barChart.png", document);
                 PDImageXObject lineChart = PDImageXObject.createFromFile("lineChart.png", document);
 
-                contentStream.drawImage(pieChart, 0, 500, 200, 200);
-                contentStream.drawImage(barChart, 0, 500, 400, 200);
-                contentStream.drawImage(lineChart, 0, 250, 450, 200);
+                contentStream.drawImage(pieChart, 0, 50, 400, 300);
+                contentStream.drawImage(barChart, 0, 700, 400, 200);
+                contentStream.drawImage(lineChart, 0, 450, 450, 200);
             }
 
             // 5️⃣ Save PDF
